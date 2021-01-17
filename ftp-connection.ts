@@ -8,17 +8,28 @@ export class FtpConnection {
 
         this.client = new Client();
         // this.client.ftp.verbose = true; 
-        await this.client.access(options);
-        return await this.client.list();
+        try {
+            await this.client.access(options);
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+        return true;
     }
 
-    private onConnectionReady(): void {
+    public async getDir(dirPath: string): Promise<boolean> {
 
-        console.log(`Connected to ftp server`)
+        try {
+            await this.client.downloadToDir('./world', dirPath);
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false
+        }
     }
 }
 
 const connection: FtpConnection = new FtpConnection();
 connection.init({
 
-}).then(list => console.log(list));
+}).then(response => connection.getDir('world').then(world => console.log(world)));
