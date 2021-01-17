@@ -1,4 +1,6 @@
 {
+  "compileOnSave": true,
+  "watch": true,
     "compilerOptions": {
       "module": "es2020",
       "esModuleInterop": true,
