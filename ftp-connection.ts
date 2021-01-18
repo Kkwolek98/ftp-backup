@@ -28,8 +28,3 @@ export class FtpConnection {
         }
     }
 }
-
-const connection: FtpConnection = new FtpConnection();
-connection.init({
-
-}).then(response => connection.getDir('world').then(world => console.log(world)));
