@@ -1,5 +1,6 @@
 import archiver from 'archiver';
 import { AccessOptions, Client } from 'basic-ftp';
+import { dir } from 'console';
 import * as fs from 'fs';
 
 export class FtpConnection {
@@ -12,14 +13,18 @@ export class FtpConnection {
         // this.client.ftp.verbose = true; 
         try {
             await this.client.access(options);
+
+            console.log(`Established connection to the ftp server...`)
+
+            return true;
         } catch (error) {
             console.error(error);
             return false;
         }
-        return true;
     }
 
     public async getDir(dirPath: string): Promise<string> {
+        console.log(`Getting '${dirPath}' directory...`);
 
         try {
             await this.client.downloadToDir('./' + dirPath, dirPath);
@@ -31,9 +36,10 @@ export class FtpConnection {
     }
 
     public async getZippedDir(dirPath: string): Promise<any> {
-
         try {
             await this.getDir(dirPath).then((dir) => {
+                console.log(`Zipping '${dirPath}' directory...`);
+
                 const output = fs.createWriteStream(`./${dir}.zip`);
                 const archive = archiver('zip');
 

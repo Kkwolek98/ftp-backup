@@ -15,6 +15,6 @@ function getJsonConfig(): IConfigData {
 const connection: FtpConnection = new FtpConnection();
 connection.init(getJsonConfig().ftp)
     .then(response => connection.getZippedDir('world')
-    .then(world => console.log(world)))
-    .catch(error => console.error(error))
+    .then()
+    ).catch(error => console.error(error))
     .finally(() => console.log("file downloaded"));
