@@ -1,9 +1,11 @@
+import { GoogleDriveConnection } from './google-drive-connection';
 import { AccessOptions } from 'basic-ftp';
 import * as fs from 'fs';
 import { FtpConnection } from './ftp-connection';
 
 export interface IConfigData {
-    ftp: AccessOptions
+    ftp: AccessOptions,
+    installed: any;
 }
 
 function getJsonConfig(): IConfigData {
@@ -12,9 +14,12 @@ function getJsonConfig(): IConfigData {
     return configData;
 }
 
-const connection: FtpConnection = new FtpConnection();
-connection.init(getJsonConfig().ftp)
-    .then(response => connection.getZippedDir('world')
+const ftp: FtpConnection = new FtpConnection();
+ftp.init(getJsonConfig().ftp)
+    .then(response => ftp.getZippedDir('world')
     .then()
     ).catch(error => console.error(error))
     .finally(() => console.log("file downloaded"));
+
+const drive: GoogleDriveConnection = new GoogleDriveConnection(getJsonConfig().installed);
+drive.updateFile('world.zip', 'world.zip');
