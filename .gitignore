@@ -5,3 +5,5 @@ package-lock.json
 /world
 config.json
 world.zip
+config.json
+token.json
