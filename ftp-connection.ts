@@ -1,6 +1,5 @@
 import archiver from 'archiver';
 import { AccessOptions, Client } from 'basic-ftp';
-import { dir } from 'console';
 import * as fs from 'fs';
 
 export class FtpConnection {
