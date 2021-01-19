@@ -67,6 +67,7 @@ export class GoogleDriveConnection {
             body: fs.createReadStream(path)
         }
         this.drive.files.create({
+            requestBody:  metadata,
             media,
             fields: 'id'
         }, (error, file) => {
