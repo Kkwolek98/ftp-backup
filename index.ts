@@ -14,12 +14,25 @@ function getJsonConfig(): IConfigData {
     return configData;
 }
 
-const ftp: FtpConnection = new FtpConnection();
-ftp.init(getJsonConfig().ftp)
-    .then(response => ftp.getZippedDir('world')
-    .then()
-    ).catch(error => console.error(error))
-    .finally(() => console.log("file downloaded"));
+async function uploadFile(): Promise<any> {
+    const drive: GoogleDriveConnection = new GoogleDriveConnection(getJsonConfig().installed);
+    return await drive.replaceFile('world.zip', 'world.zip');
+}
 
-const drive: GoogleDriveConnection = new GoogleDriveConnection(getJsonConfig().installed);
-drive.updateFile('world.zip', 'world.zip');
+async function downloadFile(): Promise<string> {
+    const ftp: FtpConnection = new FtpConnection();
+    const file = await ftp.init(getJsonConfig().ftp)
+        .then((_response) => ftp.getZippedDir('world')
+        .then((fileName) => {
+            return fileName;
+        })
+        ).catch(error => {
+            console.error(error)
+            return '';
+        })
+    return file;
+}
+
+downloadFile().then( (fileName) => {
+    uploadFile().then(() => process.exit());
+});

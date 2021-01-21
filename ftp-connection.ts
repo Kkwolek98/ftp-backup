@@ -34,9 +34,9 @@ export class FtpConnection {
         }
     }
 
-    public async getZippedDir(dirPath: string): Promise<any> {
+    public async getZippedDir(dirPath: string): Promise<string> {
         try {
-            await this.getDir(dirPath).then((dir) => {
+            return await this.getDir(dirPath).then(async (dir) => {
                 console.log(`Zipping '${dirPath}' directory...`);
 
                 const output = fs.createWriteStream(`./${dir}.zip`);
@@ -61,7 +61,8 @@ export class FtpConnection {
                 archive.pipe(output);
 
                 archive.directory(dirPath, dirPath);
-                return archive.finalize();
+                await archive.finalize();
+                return `${dir}.zip`.substring(2);
             });
         } catch (error) {
             console.error(error);

@@ -2,7 +2,6 @@ import { drive_v3, google, GoogleApis } from 'googleapis';
 import {OAuth2Client} from 'google-auth-library';
 import * as fs from 'fs';
 import * as readline from 'readline';
-import { drive } from 'googleapis/build/src/apis/drive';
 
 export class GoogleDriveConnection {
 
@@ -28,10 +27,13 @@ export class GoogleDriveConnection {
     }
 
 
-    public getMainDirectory(): any {
-        this.drive.files.list({
-            pageSize: 10
-        }).then(files => console.log(files.data.files))
+    public async getMainDirectory(): Promise<drive_v3.Schema$File[]> {
+        return this.drive.files.list({
+            pageSize: 99
+        }).then(files => {
+            console.log(files.data.files)
+            return files.data.files;
+        });
     }
 
     private getAccessToken(): void {
@@ -58,7 +60,7 @@ export class GoogleDriveConnection {
         });
     }
 
-    public updateFile(path: string, fileName: string) {
+    public async uploadFile(path: string, fileName: string): Promise<string> {
         const metadata = {
             'name': fileName
         }
@@ -66,16 +68,53 @@ export class GoogleDriveConnection {
             mimeType: 'application/zip',
             body: fs.createReadStream(path)
         }
-        this.drive.files.create({
+        return await this.drive.files.create({
             requestBody:  metadata,
             media,
             fields: 'id'
-        }, (error, file) => {
-            if (error) {
-                console.error(error);
-            } else {
+        }).then( (file) => {
                 console.log(`File uploaded, ID ${file.data.id}`)
+                return file.data.name;
+        }).catch((error) => {
+            console.error(error);
+            return "";
+        });
+    }
+
+    public async replaceFile(path: string, fileName: string): Promise<boolean> {
+        const fileFound = await this.getMainDirectory().then((files) => {
+            return files.find((file) => file.name === fileName);
+        }).catch(() => null);
+        
+
+        if (fileFound) {
+            const metadata = {
+                'name': fileName
             }
-        })
+            
+            const media = {
+                mimeType: 'application/zip',
+                body: fs.createReadStream(path)
+            }
+
+            await this.drive.files.update({
+                fileId: fileFound.id,
+                requestBody:  metadata,
+                media,
+                fields: 'id'
+            }).then((file) => {
+                console.log(`File replaced, ID ${file.data.id}`)
+                return true;
+            }).catch((error) => {
+                console.error(error);
+                return false;
+            }) 
+        } else {
+            return await this.uploadFile(path, fileName).then((name) => {
+                return !!name.length;
+            }).catch(() => {
+                return false;
+            });
+        }
     }
 }
